@@ -1,0 +1,85 @@
+/* 
+create-simple-custom-lookup-picker-in-Sharepoint List
+
+This Customization was made using Jquery and SharePoint Modal Dialog Method to Listview and return the link to automatic fill the “Hyperlink or Picture” Column.
+This customization has to be done in the Forms “New/Edit” where the option will appear and in the ListViews where the users should select the Document/Picture.
+
+
+Create the Custom List
+The first task is to create a Custom List with 2 new Columns with the following names and Type:
+Image Link “Hyperlink or Picture” - (Picture)
+Document Link “Hyperlink or Picture” - (Hyperlink)
+
+Edit the NewForm.aspx and EditForm.aspx and change the openddialog('Destiny Folder View URL','Name of field').
+For this example was used 2 Library, Picture Library and Document Library and copy the Views url associated.
+OpenDialogUrl (Url of the View)
+field 'Image Link' and 'Document Link'
+After the change add a "Script Editor Web Part" and add the code.*/
+
+<script src="../../SiteAssets/jquery-1.9.1.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+
+$(document).ready(function() {
+    $("input[title='Image Link']").parent().append('</br><input type="button" onclick="OpenDialog(\'../../PublishingImages/Forms/Thumbnails.aspx\',\'Image Link\')" value="Select Image"></input><br/>');
+    $("input[title='Document Link']").parent().append('</br><input type="button" onclick="OpenDialog(\'../../Shared%20Documents/Forms/AllItems.aspx\',\'Document Link\')" value="Select Document"></input><br/>');
+    });
+    
+    
+    function OpenDialog(OpenDialog,Field) {
+        var options = SP.UI.$create_DialogOptions();
+        options.url = OpenDialog;
+     this.GlobalField= Field;
+        //options.showMaximized = true;
+        options.dialogReturnValueCallback = Function.createDelegate(null, CloseCallback);
+        SP.UI.ModalDialog.showModalDialog(options);
+    }
+    
+    function CloseCallback(result, target) {
+        if (result == SP.UI.DialogResult.OK) {
+            $("input[title='"+GlobalField+"']").val(target);
+        }
+        if (result == SP.UI.DialogResult.cancel) {
+            // Run Cancel Code
+        }
+    }
+    </script>
+    
+    
+    /*Edit the Script Editor Web Part and add the following 
+    code to select the Image in the checkbox of the image.*/
+    
+    
+    * <script src="../../SiteAssets/jquery-1.9.1.js" type="text/javascript"></script>
+    <script type="text/javascript"> 
+    $(document).ready(function() {
+    $('.s4-itm-imgCbx-inner').click(function() {
+    var id= $(this).parent().parent().parent().parent().children().attr('id').substring(0, $(this).parent().parent().parent().parent().children().attr('id').length - 1)+'7';
+    
+    var filext = $('#'+id).attr('src').substr($('#'+id).attr('src').lastIndexOf('.'));
+    
+    var remterm=$('#'+id).attr('src').replace('_w/','').replace(filext,'');
+    
+    var link = remterm.substr(remterm.lastIndexOf('_')+1);
+    remterm = remterm.replace('_'+link,'.'+link);
+    SP.UI.ModalDialog.commonModalDialogClose(SP.UI.DialogResult.OK, remterm);
+    
+    });
+    });
+    </script>
+    
+    
+    /*Edit the Script Editor Web Part and add the following code to select the Image in the 
+    checkbox of the Document.*/
+    
+    <script src="../../SiteAssets/jquery-1.9.1.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    $( document ).ready(function() {
+    $('.s4-itm-cbx').click(function() {
+    var link =$(this).parent().parent().children('.ms-vb-title').children().children().attr('href');
+    
+    SP.UI.ModalDialog.commonModalDialogClose(SP.UI.DialogResult.OK, link);
+    
+    });
+    });
+    </script>
